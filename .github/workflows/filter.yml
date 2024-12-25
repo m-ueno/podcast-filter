@@ -1,0 +1,38 @@
+name: Publish feed
+
+on:
+  push:
+  schedule:
+    - cron: "0 21 */3 * *" # every 3 days at 21:00 UTC (06:00 JST)
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+      - name: Run tests (continue on fail)
+        run: go test -v ./...
+        continue-on-error: true
+      - name: Generate feed
+        run: |
+          mkdir ./public
+          go run cmd/podfilter/main.go > ./public/feed.xml
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    permissions:
+      id-token: write
+      pages: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment
