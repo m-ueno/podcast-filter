@@ -19,8 +19,9 @@ jobs:
         continue-on-error: true
       - name: Generate feed
         run: |
-          mkdir ./public
-          go run cmd/podfilter/main.go > ./public/feed.xml
+          go run cmd/podfilter/main.go
+          cd public
+          tree -H . -L 1 --noreport --charset utf-8 > index.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./public
