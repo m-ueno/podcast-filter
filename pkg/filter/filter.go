@@ -9,11 +9,11 @@ import (
 )
 
 type DescriptionIncludeRule struct {
-	DesciptionInclude string
+	DescriptionInclude string
 }
 
 func (r DescriptionIncludeRule) Match(item *PodcastItem) bool {
-	return strings.Contains(item.Description, r.DesciptionInclude)
+	return strings.Contains(item.Description, r.DescriptionInclude)
 }
 
 type RuleSet []DescriptionIncludeRule

@@ -31,24 +31,24 @@ func TestParseFilter(t *testing.T) {
 		{
 			Name: "empty",
 			RuleSet: filter.RuleSet{
-				{DesciptionInclude: "奥山昌次郎"},
+				{DescriptionInclude: "奥山昌次郎"},
 			},
 			Want: 0,
 		},
 		{
 			Name: "single",
 			RuleSet: filter.RuleSet{
-				{DesciptionInclude: "奥山晶二郎"},
-				{DesciptionInclude: "甲子園の応援"},
+				{DescriptionInclude: "奥山晶二郎"},
+				{DescriptionInclude: "甲子園の応援"},
 			},
 			Want: 1,
 		},
 		{
 			Name: "the three",
 			RuleSet: filter.RuleSet{
-				{DesciptionInclude: "奥山"},
-				{DesciptionInclude: "伊藤"},
-				{DesciptionInclude: "神田"},
+				{DescriptionInclude: "奥山"},
+				{DescriptionInclude: "伊藤"},
+				{DescriptionInclude: "神田"},
 			},
 			Want: 191,
 		},
@@ -82,8 +82,8 @@ func TestParseFilterWrite(t *testing.T) {
 
 	writer := &strings.Builder{}
 	ruleSet := filter.RuleSet{
-		{DesciptionInclude: "甲子園の応援"},
-		{DesciptionInclude: "奥山晶二郎"},
+		{DescriptionInclude: "甲子園の応援"},
+		{DescriptionInclude: "奥山晶二郎"},
 	}
 
 	err = filter.ParseFilterWrite(reader, writer, ruleSet)
