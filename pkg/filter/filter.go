@@ -8,15 +8,15 @@ import (
 	"github.com/mmcdole/gofeed"
 )
 
-type Rule struct {
+type DescriptionIncludeRule struct {
 	DesciptionInclude string
 }
 
-func (r Rule) Match(description string) bool {
+func (r DescriptionIncludeRule) Match(description string) bool {
 	return strings.Contains(description, r.DesciptionInclude)
 }
 
-type RuleSet []Rule
+type RuleSet []DescriptionIncludeRule
 
 func ParseFilter(r io.Reader, ruleSet RuleSet) (*gofeed.Feed, error) {
 	fp := gofeed.NewParser()
