@@ -12,24 +12,24 @@ type DescriptionIncludeRule struct {
 	DesciptionInclude string
 }
 
-func (r DescriptionIncludeRule) Match(description string) bool {
-	return strings.Contains(description, r.DesciptionInclude)
+func (r DescriptionIncludeRule) Match(item *PodcastItem) bool {
+	return strings.Contains(item.Description, r.DesciptionInclude)
 }
 
 type RuleSet []DescriptionIncludeRule
 
-func ParseFilter(r io.Reader, ruleSet RuleSet) (*gofeed.Feed, error) {
+func ParseFilter(r io.Reader, ruleSet RuleSet) (*PodcastFeed, error) {
 	fp := gofeed.NewParser()
 	feed, err := fp.Parse(r)
 	if err != nil {
 		return nil, err
 	}
 
-	var items []*gofeed.Item
+	var items []*PodcastItem
 	for _, item := range feed.Items {
 		includeItem := true
 		for _, rule := range ruleSet {
-			if !rule.Match(item.Description) {
+			if !rule.Match(item) {
 				includeItem = false
 			}
 		}
