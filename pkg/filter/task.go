@@ -11,6 +11,13 @@ type FilterFeedTaskSet struct {
 	OutputDir string
 }
 
+func NewFilterFeedTaskSet(tasks []FilterFeedTask, outputDir string) FilterFeedTaskSet {
+	return FilterFeedTaskSet{
+		Tasks:     tasks,
+		OutputDir: outputDir,
+	}
+}
+
 func (ts FilterFeedTaskSet) Run() error {
 	if err := os.MkdirAll(ts.OutputDir, 0755); err != nil && err != os.ErrExist {
 		return err
