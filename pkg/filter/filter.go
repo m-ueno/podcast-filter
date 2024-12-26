@@ -8,32 +8,43 @@ import (
 	"github.com/mmcdole/gofeed"
 )
 
-type Rule struct {
-	DesciptionInclude string
+type Rule interface {
+	Match(item *PodcastItem) bool
 }
 
-func (r Rule) Match(description string) bool {
-	return strings.Contains(description, r.DesciptionInclude)
+type DescriptionIncludeRule struct {
+	Substring string
 }
 
-type RuleSet []Rule
+func (r DescriptionIncludeRule) Match(item *PodcastItem) bool {
+	return strings.Contains(item.Description, r.Substring)
+}
 
-func ParseFilter(r io.Reader, ruleSet RuleSet) (*gofeed.Feed, error) {
-	fp := gofeed.NewParser()
-	feed, err := fp.Parse(r)
+type AndRule []Rule
+
+// Match implement rule
+func (r AndRule) Match(item *PodcastItem) bool {
+	for _, rule := range r {
+		if !rule.Match(item) {
+			return false
+		}
+	}
+	return true
+}
+
+func And(rules ...Rule) AndRule {
+	return AndRule(rules)
+}
+
+func ParseFilter(r io.Reader, rule Rule) (*PodcastFeed, error) {
+	feed, err := gofeed.NewParser().Parse(r)
 	if err != nil {
 		return nil, err
 	}
 
-	var items []*gofeed.Item
+	var items []*PodcastItem
 	for _, item := range feed.Items {
-		includeItem := true
-		for _, rule := range ruleSet {
-			if !rule.Match(item.Description) {
-				includeItem = false
-			}
-		}
-		if includeItem {
+		if rule.Match(item) {
 			items = append(items, item)
 		}
 	}
@@ -42,12 +53,7 @@ func ParseFilter(r io.Reader, ruleSet RuleSet) (*gofeed.Feed, error) {
 	return feed, nil
 }
 
-func ParseFilterWrite(r io.Reader, w io.Writer, ruleSet RuleSet) error {
-	feed, err := ParseFilter(r, ruleSet)
-	if err != nil {
-		return err
-	}
-
+func convertGofeedToGorillaFeed(feed *PodcastFeed) *feeds.Feed {
 	newFeed := &feeds.Feed{
 		Title: feed.Title,
 		Link: &feeds.Link{
@@ -81,6 +87,15 @@ func ParseFilterWrite(r io.Reader, w io.Writer, ruleSet RuleSet) error {
 			},
 		})
 	}
+	return newFeed
+}
+
+func ParseFilterWrite(r io.Reader, w io.Writer, rule Rule) error {
+	feed, err := ParseFilter(r, rule)
+	if err != nil {
+		return err
+	}
+	newFeed := convertGofeedToGorillaFeed(feed)
 
 	return newFeed.WriteRss(w)
 }

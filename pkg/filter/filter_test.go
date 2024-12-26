@@ -24,32 +24,30 @@ func NewTestReader() (*strings.Reader, error) {
 
 func TestParseFilter(t *testing.T) {
 	tests := []struct {
-		Name    string
-		RuleSet filter.RuleSet
-		Want    int
+		Name string
+		Rule filter.Rule
+		Want int
 	}{
 		{
 			Name: "empty",
-			RuleSet: filter.RuleSet{
-				{DesciptionInclude: "奥山昌次郎"},
-			},
+			Rule: filter.DescriptionIncludeRule{"奥山昌次郎"},
 			Want: 0,
 		},
 		{
 			Name: "single",
-			RuleSet: filter.RuleSet{
-				{DesciptionInclude: "奥山晶二郎"},
-				{DesciptionInclude: "甲子園の応援"},
-			},
+			Rule: filter.And(
+				filter.DescriptionIncludeRule{"奥山晶二郎"},
+				filter.DescriptionIncludeRule{"甲子園の応援"},
+			),
 			Want: 1,
 		},
 		{
 			Name: "the three",
-			RuleSet: filter.RuleSet{
-				{DesciptionInclude: "奥山"},
-				{DesciptionInclude: "伊藤"},
-				{DesciptionInclude: "神田"},
-			},
+			Rule: filter.And(
+				filter.DescriptionIncludeRule{"奥山"},
+				filter.DescriptionIncludeRule{"伊藤"},
+				filter.DescriptionIncludeRule{"神田"},
+			),
 			Want: 191,
 		},
 	}
@@ -62,7 +60,7 @@ func TestParseFilter(t *testing.T) {
 				t.Error(err)
 			}
 
-			feed, err := filter.ParseFilter(reader, test.RuleSet)
+			feed, err := filter.ParseFilter(reader, test.Rule)
 
 			if err != nil {
 				t.Errorf("expected no error, got %v", err)
@@ -74,6 +72,14 @@ func TestParseFilter(t *testing.T) {
 	}
 }
 
+func TestParseFilter_badinput(t *testing.T) {
+	badinput := strings.NewReader("<xml></xml>")
+	_, err := filter.ParseFilter(badinput, filter.DescriptionIncludeRule{})
+	if err == nil {
+		t.Fatal("want error, got nil")
+	}
+}
+
 func TestParseFilterWrite(t *testing.T) {
 	reader, err := NewTestReader()
 	if err != nil {
@@ -81,10 +87,10 @@ func TestParseFilterWrite(t *testing.T) {
 	}
 
 	writer := &strings.Builder{}
-	ruleSet := filter.RuleSet{
-		{DesciptionInclude: "甲子園の応援"},
-		{DesciptionInclude: "奥山晶二郎"},
-	}
+	ruleSet := filter.And(
+		filter.DescriptionIncludeRule{"甲子園の応援"},
+		filter.DescriptionIncludeRule{"奥山晶二郎"},
+	)
 
 	err = filter.ParseFilterWrite(reader, writer, ruleSet)
 	if err != nil {
