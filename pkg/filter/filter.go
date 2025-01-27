@@ -24,6 +24,7 @@ type DescriptionExcludeRule struct {
 	Substring string
 }
 
+// Match returns true if the item's description does NOT contain the substring
 func (r DescriptionExcludeRule) Match(item *PodcastItem) bool {
 	return !strings.Contains(item.Description, r.Substring)
 }
