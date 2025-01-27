@@ -20,6 +20,14 @@ func (r DescriptionIncludeRule) Match(item *PodcastItem) bool {
 	return strings.Contains(item.Description, r.Substring)
 }
 
+type DescriptionExcludeRule struct {
+	Substring string
+}
+
+func (r DescriptionExcludeRule) Match(item *PodcastItem) bool {
+	return !strings.Contains(item.Description, r.Substring)
+}
+
 type AndRule []Rule
 
 // Match implement rule

@@ -34,6 +34,11 @@ func TestParseFilter(t *testing.T) {
 			Want: 0,
 		},
 		{
+			Name: "exclude",
+			Rule: filter.DescriptionExcludeRule{"神田大介"},
+			Want: 878,
+		},
+		{
 			Name: "single",
 			Rule: filter.And(
 				filter.DescriptionIncludeRule{"奥山晶二郎"},
