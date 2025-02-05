@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/gorilla/feeds v1.2.0
 	github.com/mmcdole/gofeed v1.3.0
+	golang.org/x/sync v0.10.0
 )
 
 require (

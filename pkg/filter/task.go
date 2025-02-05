@@ -1,9 +1,12 @@
 package filter
 
 import (
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type FilterFeedTaskSet struct {
@@ -26,10 +29,18 @@ func (ts FilterFeedTaskSet) Run() error {
 	if err := os.MkdirAll(ts.OutputDir, 0755); err != nil && err != os.ErrExist {
 		return err
 	}
+	var g errgroup.Group
 	for _, task := range ts.Tasks {
-		if err := task.Run(ts.OutputDir); err != nil {
-			return err
-		}
+		task := task
+		g.Go(func() error {
+			defer slog.Info("End task", "url", task.FeedUrl)
+			slog.Info("Start task", "url", task.FeedUrl)
+			return task.Run(ts.OutputDir)
+		})
+	}
+
+	if err := g.Wait(); err != nil {
+		return err
 	}
 	return nil
 }
